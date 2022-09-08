@@ -13,7 +13,7 @@ pressure = []  # Массив для записи данных о давлени
 time_get = []
 interval = 60 * 10  # Интервал обновления данных в секундах
 graph_delta = 24  # Количество часов для отображения на графике
-data_col = (3600 * graph_delta) / interval # Количество записей для отображения на графике
+data_col = (3600 * graph_delta) / interval  # Количество записей для отображения на графике
 
 
 def zapros_sensor(url_link, num):  # Функция для запроса данных с сенсора
@@ -25,7 +25,7 @@ def zapros_sensor(url_link, num):  # Функция для запроса дан
     except Exception as e:  # Если запрос не удался, то возвращаем 0
         logging.error(f'Ошибка запроса данных с сенсора {e}')
         print(e)
-        return 888888 # Признак ошибки получения данных
+        return 888888  # Признак ошибки получения данных
 
 
 def check_len_data(spisok):  # Функция для проверки длины массива
@@ -63,10 +63,9 @@ def update_data():  # Функция для обновления данных
             df = pd.DataFrame(
                 {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure})  # Создаем датафрейм
             plt.figure(1, figsize=(20, 15), dpi=80)  # Создаем график и задаем размеры его по ширине и высоте
-            ax = df.plot(x='Время', y=['Дом', 'Улица'], figsize=(18, 10), grid=True,
-                         style=['r:', 'b-'])  # Создаем график
+            ax = df.plot(x='Время', y=['Дом', 'Улица'], figsize=(18, 10), grid=True)  # Создаем график
             ax = df.plot(x='Время', secondary_y=['Давление'], figsize=(18, 10), grid=True,
-                         style=['g-'])  # Создаем график
+                         color=['b', 'r', 'g'], linewidth=3)  # Создаем график
             plt.title(
                 f'Атмосферное давление: {pressure[-1]} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С',
                 fontsize=20)  # Задаем заголовок графика
@@ -82,10 +81,10 @@ def update_data():  # Функция для обновления данных
 
 if __name__ == '__main__':
     logging.basicConfig(filename='graph.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    logging.info('Запуск программы') # Выводим в лог информацию о запуске программы
+    logging.info('Запуск программы')  # Выводим в лог информацию о запуске программы
     try:
-        subprocess.Popen('python server1.py', shell=True) # Запускаем сервер
+        subprocess.Popen('python server1.py', shell=True)  # Запускаем сервер
     except Exception as e:
-        logging.error(f'Ошибка в модуле запуска сервера: {e}') # Выводим ошибку в лог
-    logging.info('Cервер запущен') # Выводим в лог информацию о запуске сервера
-    update_data() # Запускаем функцию обновления данных
+        logging.error(f'Ошибка в модуле запуска сервера: {e}')  # Выводим ошибку в лог
+    logging.info('Cервер запущен')  # Выводим в лог информацию о запуске сервера
+    update_data()  # Запускаем функцию обновления данных
