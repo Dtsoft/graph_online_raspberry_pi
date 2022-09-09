@@ -35,7 +35,7 @@ def check_len_data(spisok):  # Функция для проверки длины
 
 
 def plus(tem):  # Добавляем плюс к положительным значениям
-    return tem if tem <= 0 else '+' + str(int(tem))
+    return tem if tem <= 0 else '+' + str(tem)
 
 
 def update_data():  # Функция для обновления данных
@@ -43,9 +43,10 @@ def update_data():  # Функция для обновления данных
     try:
         while True:
             time_get.append(time.strftime('%H:%M'))  # Получаем время
-            sens_t_ul = float(zapros_sensor(url_1, 1))  # Получаем данные с сенсора во временную переменную
-            sens_t_kv = float(zapros_sensor(url_2, 6))  # Получаем данные с сенсора во временную переменную
-            sens_pressure = float(zapros_sensor(url_2, 4))  # Получаем данные с сенсора во временную переменную
+            sens_t_ul = round(float(zapros_sensor(url_1, 1)), 1) # Получаем данные с сенсора во временную переменную
+            print(type(sens_t_ul))
+            sens_t_kv = round(float(zapros_sensor(url_2, 6)), 1)  # Получаем данные с сенсора во временную переменную
+            sens_pressure = int(float(zapros_sensor(url_2, 4)))  # Получаем данные с сенсора во временную переменную
             temp.append(
                 sens_t_ul if sens_t_ul != 888888 else temp[-1])  # Добавляем значение полученное из сенсора в массив
             temp_k.append(
