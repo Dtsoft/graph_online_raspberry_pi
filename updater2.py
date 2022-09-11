@@ -46,7 +46,7 @@ def update_data():  # Функция для обновления данных
             sens_t_ul = round(float(zapros_sensor(url_1, 1)), 1) # Получаем данные с сенсора во временную переменную
             print(type(sens_t_ul))
             sens_t_kv = round(float(zapros_sensor(url_2, 6)), 1)  # Получаем данные с сенсора во временную переменную
-            sens_pressure = int(float(zapros_sensor(url_2, 4)))  # Получаем данные с сенсора во временную переменную
+            sens_pressure = round(float(zapros_sensor(url_2, 4)), 1)  # Получаем данные с сенсора во временную переменную
             temp.append(
                 sens_t_ul if sens_t_ul != 888888 else temp[-1])  # Добавляем значение полученное из сенсора в массив
             temp_k.append(
@@ -60,7 +60,7 @@ def update_data():  # Функция для обновления данных
             check_len_data(
                 time_get)  # Проверяем длину массива и удаляем первый элемент если он больше нужного количества
             print(
-                f'Обновлено в {time_get[-1]}: {temp[-1]}, {temp_k[-1]}, {pressure[-1]}')  # Выводим время последнего обновления
+                f'Обновлено в {time_get[-1]}: {temp[-1]}, {temp_k[-1]}, {int(pressure[-1])}')  # Выводим время последнего обновления
             df = pd.DataFrame(
                 {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure})  # Создаем датафрейм
             plt.figure(1, figsize=(20, 15), dpi=80)  # Создаем график и задаем размеры его по ширине и высоте
