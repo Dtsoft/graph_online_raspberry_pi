@@ -9,9 +9,10 @@ url_1 = 'http://192.168.22.220/sensors'  # Адрес страницы с сен
 url_2 = 'http://192.168.22.123/sensors'  # Адрес страницы с сенсорами
 temp = []  # Массив для хранения данных температуры
 temp_k = []
+temp_hot = []  # Массив для хранения данных температуры
 pressure = []  # Массив для записи данных о давлении
 time_get = []
-interval = 60 * 10  # Интервал обновления данных в секундах
+interval = 60 * 1  # Интервал обновления данных в секундах
 graph_delta = 24  # Количество часов для отображения на графике
 data_col = (3600 * graph_delta) / interval  # Количество записей для отображения на графике
 
@@ -39,20 +40,23 @@ def plus(tem):  # Добавляем плюс к положительным зн
 
 
 def update_data():  # Функция для обновления данных
-    global temp, pressure  # Объявляем глобальные переменные
+    global temp, pressure, temp_hot, temp_k  # Объявляем глобальные переменные
     try:
         while True:
             time_get.append(time.strftime('%H:%M'))  # Получаем время
             sens_t_ul = float(zapros_sensor(url_1, 1))  # Получаем данные с сенсора во временную переменную
             print(type(sens_t_ul))
             sens_t_kv = float(zapros_sensor(url_2, 6))  # Получаем данные с сенсора во временную переменную
+            sens_t_hot = float(zapros_sensor(url_2, 5))  # Получаем данные с сенсора во временную переменную
             sens_pressure = float(zapros_sensor(url_2, 4))  # Получаем данные с сенсора во временную переменную
+            temp_hot.append(sens_t_hot if sens_t_hot != 888888 else temp_hot[-1])  # Добавляем данные в массив
             temp.append(
                 sens_t_ul if sens_t_ul != 888888 else temp[-1])  # Добавляем значение полученное из сенсора в массив
             temp_k.append(
                 sens_t_kv if sens_t_kv != 888888 else temp_k[-1])  # Добавляем значение полученное из сенсора в массив
             pressure.append(sens_pressure if sens_pressure != 888888 else pressure[
                 -1])  # Добавляем значение полученное из сенсора в массив
+            check_len_data(temp_hot)  # Проверяем длину массива
             check_len_data(temp)  # Проверяем длину массива и удаляем первый элемент если он больше нужного количества
             check_len_data(temp_k)  # Проверяем длину массива и удаляем первый элемент если он больше нужного количества
             check_len_data(
@@ -63,13 +67,14 @@ def update_data():  # Функция для обновления данных
                 f'Обновлено в {time_get[-1]}: {temp[-1]}, {temp_k[-1]}, {int((pressure[-1]))}')  # Выводим время
             # последнего обновления
             df = pd.DataFrame(
-                {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure})  # Создаем датафрейм
+                {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure,
+                 'Отопление': temp_hot})  # Создаем датафрейм
             plt.figure(1, figsize=(20, 15), dpi=80)  # Создаем график и задаем размеры его по ширине и высоте
-            ax = df.plot(x='Время', y=['Дом', 'Улица'], figsize=(18, 10), grid=True)  # Создаем график
+            ax = df.plot(x='Время', y=['Дом', 'Улица', 'Отопление'], figsize=(18, 10), grid=True)  # Создаем график
             ax = df.plot(x='Время', secondary_y=['Давление'], figsize=(18, 10), grid=True,
-                         color=['b', 'r', 'g'], linewidth=3)  # Создаем график
+                         color=['b', 'r', 'g', 'y'], linewidth=3)  # Создаем график
             plt.title(
-                f'Атмосферное давление: {int(pressure[-1])} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С',
+                f'Атмосферное давление: {int(pressure[-1])} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С, отопление: {plus(temp_hot[-1])}°С',
                 fontsize=20)  # Задаем заголовок графика
             plt.grid(True)  # Включаем сетку
             plt.savefig('static/image.png')  # Сохраняем график в файл

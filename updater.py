@@ -64,3 +64,4 @@ def update_data():  # Функция для обновления данных
 
 if __name__ == '__main__':
     update_data()
+
