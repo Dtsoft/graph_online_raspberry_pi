@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import subprocess
 import pandas as pd
 import logging
+import json
 
 url_1 = 'http://192.168.22.220/sensors'  # Адрес страницы с сенсорами
 url_2 = 'http://192.168.22.123/sensors'  # Адрес страницы с сенсорами
@@ -13,7 +14,7 @@ temp_hot = []  # Массив для хранения данных темпер�
 pressure = []  # Массив для записи данных о давлении
 time_get = []
 interval = 60 * 1  # Интервал обновления данных в секундах
-graph_delta = 24  # Количество часов для отображения на графике
+graph_delta = 48  # Количество часов для отображения на графике
 data_col = (3600 * graph_delta) / interval  # Количество записей для отображения на графике
 
 
@@ -39,9 +40,33 @@ def plus(tem):  # Добавляем плюс к положительным зн
     return round(tem, 1) if tem <= 0 else '+' + str(round(tem, 1))
 
 
-def update_data():  # Функция для обновления данных
-    global temp, pressure, temp_hot, temp_k  # Объявляем глобальные переменные
+def save_to_json(data, name):  # Функция для сохранения данных в json файл
     try:
+        with open(name, 'w') as f:
+            json.dump(data, f)
+    except Exception as e:
+        logging.error(f'Ошибка сохранения данных в json файл {e}')
+        print(e)
+
+
+def read_from_json(data, name):  # Функция для чтения данных из json файла
+    try:
+        with open(name, 'r') as f:
+            data = json.load(f)
+        return data
+    except Exception as e:
+        logging.error(f'Ошибка чтения данных из json файла {e}')
+        print(e)
+
+
+def update_data():  # Функция для обновления данных
+    global temp, pressure, temp_hot, temp_k, time_get  # Объявляем глобальные переменные
+    try:
+        temp = read_from_json(temp, 'temp.json')  # Читаем данные из json файла
+        pressure = read_from_json(pressure, 'pressure.json')
+        temp_hot = read_from_json(temp_hot, 'temp_hot.json')
+        temp_k = read_from_json(temp_k, 'temp_k.json')
+        time_get = read_from_json(time_get, 'time_get.json')
         while True:
             time_get.append(time.strftime('%H:%M'))  # Получаем время
             sens_t_ul = float(zapros_sensor(url_1, 1))  # Получаем данные с сенсора во временную переменную
@@ -63,6 +88,11 @@ def update_data():  # Функция для обновления данных
                 pressure)  # Проверяем длину массива и удаляем первый элемент если он больше нужного количества
             check_len_data(
                 time_get)  # Проверяем длину массива и удаляем первый элемент если он больше нужного количества
+            save_to_json(temp, 'temp.json')  # Сохраняем данные в json файл
+            save_to_json(pressure, 'pressure.json')
+            save_to_json(temp_hot, 'temp_hot.json')
+            save_to_json(temp_k, 'temp_k.json')
+            save_to_json(time_get, 'time_get.json')
             print(
                 f'Обновлено в {time_get[-1]}: {temp[-1]}, {temp_k[-1]}, {int((pressure[-1]))}')  # Выводим время
             # последнего обновления
