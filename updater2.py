@@ -13,7 +13,7 @@ temp_k = []
 temp_hot = []  # Массив для хранения данных температуры
 pressure = []  # Массив для записи данных о давлении
 time_get = []
-interval = 60 * 1  # Интервал обновления данных в секундах
+interval = 60 * 10  # Интервал обновления данных в секундах
 graph_delta = 48  # Количество часов для отображения на графике
 data_col = (3600 * graph_delta) / interval  # Количество записей для отображения на графике
 
@@ -68,6 +68,8 @@ def update_data():  # Функция для обновления данных
         temp_k = read_from_json(temp_k, 'temp_k.json')
         time_get = read_from_json(time_get, 'time_get.json')
         while True:
+            mont = int(time.strftime('%m'))  # Получаем месяц
+            print(type(mont))
             time_get.append(time.strftime('%H:%M'))  # Получаем время
             sens_t_ul = float(zapros_sensor(url_1, 1))  # Получаем данные с сенсора во временную переменную
             print(type(sens_t_ul))
@@ -96,16 +98,26 @@ def update_data():  # Функция для обновления данных
             print(
                 f'Обновлено в {time_get[-1]}: {temp[-1]}, {temp_k[-1]}, {int((pressure[-1]))}')  # Выводим время
             # последнего обновления
-            df = pd.DataFrame(
-                {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure,
-                 'Отопление': temp_hot})  # Создаем датафрейм
             plt.figure(1, figsize=(20, 15), dpi=80)  # Создаем график и задаем размеры его по ширине и высоте
-            ax = df.plot(x='Время', y=['Дом', 'Улица', 'Отопление'], figsize=(18, 10), grid=True)  # Создаем график
-            ax = df.plot(x='Время', secondary_y=['Давление'], figsize=(18, 10), grid=True,
-                         color=['b', 'r', 'g', 'y'], linewidth=3)  # Создаем график
-            plt.title(
-                f'Атмосферное давление: {int(pressure[-1])} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С, отопление: {plus(temp_hot[-1])}°С',
-                fontsize=20)  # Задаем заголовок графика
+            if 3 < mont < 10:
+                df = pd.DataFrame(
+                    {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure})  # Создаем датафрейм
+                ax = df.plot(x='Время', y=['Дом', 'Улица'], figsize=(18, 10), grid=True)  # Создаем график
+                ax = df.plot(x='Время', secondary_y=['Давление'], figsize=(18, 10), grid=True,
+                             color=['b', 'r', 'g', 'y'], linewidth=3)  # Создаем график
+                plt.title(
+                    f'Атмосферное давление: {int(pressure[-1])} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С',
+                    fontsize=20)  # Задаем заголовок графика
+            else:
+                df = pd.DataFrame(
+                    {'Время': time_get, 'Улица': temp, 'Дом': temp_k, 'Давление': pressure,
+                     'Отопление': temp_hot})  # Создаем датафрейм
+                ax = df.plot(x='Время', y=['Дом', 'Улица', 'Отопление'], figsize=(18, 10), grid=True)  # Создаем график
+                ax = df.plot(x='Время', secondary_y=['Давление'], figsize=(18, 10), grid=True,
+                             color=['b', 'r', 'g', 'y'], linewidth=3)  # Создаем график
+                plt.title(
+                    f'Атмосферное давление: {int(pressure[-1])} мм.рт.ст., Температура: улица {plus(temp[-1])}°C, дома: {plus(temp_k[-1])}°С, отопление: {plus(temp_hot[-1])}°С',
+                    fontsize=20)  # Задаем заголовок графика
             plt.grid(True)  # Включаем сетку
             plt.savefig('static/image.png')  # Сохраняем график в файл
             plt.clf()  # Очищаем график
